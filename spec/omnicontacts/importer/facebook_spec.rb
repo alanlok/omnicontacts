@@ -58,17 +58,17 @@ describe OmniContacts::Importer::Facebook do
     it "should request the contacts by providing the token in the url" do
       facebook.should_receive(:https_get) do |host, self_path, params, headers|
         params[:access_token].should eq(token)
-        params[:fields].should eq('first_name,last_name,name,id,gender,birthday,picture,relationship_status,significant_other')
+        params[:fields].should eq('first_name,last_name,name,id,gender,birthday,picture,relationship_status,significant_other,username')
         self_response
       end
       facebook.should_receive(:https_get) do |host, spouse_path, params, headers|
         params[:access_token].should eq(token)
-        params[:fields].should eq('first_name,last_name,name,id,gender,birthday,picture')
+        params[:fields].should eq('first_name,last_name,name,id,gender,birthday,picture,username')
         spouse_response
       end
       facebook.should_receive(:https_get) do |host, path, params, headers|
         params[:access_token].should eq(token)
-        params[:fields].should eq('first_name,last_name,name,id,gender,birthday,picture')
+        params[:fields].should eq('first_name,last_name,name,id,gender,birthday,picture,username')
         contacts_as_json
       end.exactly(2).times
 
