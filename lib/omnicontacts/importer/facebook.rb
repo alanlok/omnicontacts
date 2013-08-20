@@ -22,6 +22,7 @@ module OmniContacts
       end
 
       def fetch_contacts_using_access_token access_token, access_token_secret
+        fb_fields = 'first_name,last_name,name,id,gender,birthday,picture,username'
         self_response = fetch_current_user access_token
         user = current_user self_response
         set_current_user user
@@ -29,15 +30,15 @@ module OmniContacts
         spouse_response = nil
         if spouse_id
           spouse_path = "/#{spouse_id}"
-          spouse_response = https_get(@contacts_host, spouse_path, {:access_token => access_token, :fields => 'first_name,last_name,name,id,gender,birthday,picture'})
+          spouse_response = https_get(@contacts_host, spouse_path, {:access_token => access_token, :fields => fb_fields})
         end
-        family_response = https_get(@contacts_host, @family_path, {:access_token => access_token, :fields => 'first_name,last_name,name,id,gender,birthday,picture'})
-        friends_response = https_get(@contacts_host, @friends_path, {:access_token => access_token, :fields => 'first_name,last_name,name,id,gender,birthday,picture'})
+        family_response = https_get(@contacts_host, @family_path, {:access_token => access_token, :fields => fb_fields})
+        friends_response = https_get(@contacts_host, @friends_path, {:access_token => access_token, :fields => fb_fields})
         contacts_from_response(spouse_response, family_response, friends_response)
       end
 
       def fetch_current_user access_token
-        self_response = https_get(@contacts_host, @self_path, {:access_token => access_token, :fields => 'first_name,last_name,name,id,gender,birthday,picture,relationship_status,significant_other'})
+        self_response = https_get(@contacts_host, @self_path, {:access_token => access_token, :fields => 'first_name,last_name,name,id,gender,birthday,picture,relationship_status,significant_other,username'})
         self_response = JSON.parse(self_response) if self_response
         self_response
       end
@@ -85,7 +86,7 @@ module OmniContacts
         contact[:first_name] = normalize_name(contact_info['first_name'])
         contact[:last_name] = normalize_name(contact_info['last_name'])
         contact[:name] = contact_info['name']
-        contact[:email] = contact_info['email']
+        contact[:email] = "#{contact_info["username"]}@facebook.com" if contact_info["username"].present?
         contact[:gender] = contact_info['gender']
         contact[:birthday] = birthday(contact_info['birthday'])
         contact[:profile_picture] = contact_info['picture']['data']['url'] if contact_info['picture']
